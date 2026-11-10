@@ -1,12 +1,23 @@
 import { LightningElement, wire } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import getPublishedEvents from '@salesforce/apex/EpicEventzCatalogController.getPublishedEvents';
 
-export default class EpicEventzDiscovery extends LightningElement {
+export default class EpicEventzDiscovery extends NavigationMixin(LightningElement) {
     searchKey = '';
     category = '';
     city = '';
     events = [];
+    selectedEvent;
+    isLoading = true;
     errorMessage;
+
+    get hasEvents() {
+        return !this.isLoading && !this.errorMessage && this.events.length > 0;
+    }
+
+    get showEmptyState() {
+        return !this.isLoading && !this.errorMessage && this.events.length === 0;
+    }
 
     @wire(getPublishedEvents, {
         searchKey: '$searchKey',
@@ -25,31 +36,64 @@ export default class EpicEventzDiscovery extends LightningElement {
                     ? `background-image: linear-gradient(180deg, transparent, #0b1020), url("${event.Poster_URL__c}")`
                     : ''
             }));
+            this.isLoading = false;
             this.errorMessage = undefined;
         } else if (error) {
             this.events = [];
+            this.isLoading = false;
             this.errorMessage = error.body?.message || 'Events could not be loaded.';
         }
     }
 
     handleSearchChange(event) {
         this.searchKey = event.target.value;
+        this.refreshResults();
     }
 
     handleCategoryChange(event) {
         this.category = event.target.value;
+        this.refreshResults();
     }
 
     handleCityChange(event) {
         this.city = event.target.value;
+        this.refreshResults();
+    }
+
+    refreshResults() {
+        this.selectedEvent = undefined;
+        this.isLoading = true;
+        this.errorMessage = undefined;
     }
 
     handleEventClick(event) {
+        const eventId = event.currentTarget.dataset.eventId;
+        this.selectedEvent = this.events.find((record) => record.Id === eventId);
         this.dispatchEvent(new CustomEvent('eventselected', {
-            detail: { eventId: event.currentTarget.dataset.eventId },
+            detail: { eventId },
             bubbles: true,
             composed: true
         }));
+    }
+
+    handleBackToEvents() {
+        this.selectedEvent = undefined;
+    }
+
+    handleBookTickets() {
+        if (!this.selectedEvent?.Id) {
+            return;
+        }
+
+        this[NavigationMixin.Navigate]({
+            type: 'comm__namedPage',
+            attributes: {
+                name: 'Book_Tickets__c'
+            },
+            state: {
+                c__eventId: this.selectedEvent.Id
+            }
+        });
     }
 
     formatDate(value) {
