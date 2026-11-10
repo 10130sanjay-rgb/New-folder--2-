@@ -1,0 +1,92 @@
+<template>
+    <lightning-card title="Discover Events" icon-name="standard:event">
+        <div class="slds-p-around_medium">
+
+            <template lwc:if={error}>
+                <div class="slds-text-color_error">
+                    Unable to load events. Please try again later.
+                </div>
+            </template>
+
+            <template lwc:elseif={events}>
+                <template lwc:if={events.length}>
+                    <div class="event-grid">
+                        <template for:each={events} for:item="event">
+                            <article key={event.Id} class="event-card">
+
+                                <div class="event-category">
+                                    {event.eventCategory}
+                                </div>
+
+                                <h2>{event.Name}</h2>
+
+                                <p class="event-description">
+                                    {event.eventDescription}
+                                </p>
+
+                                <p>
+                                    <strong>Status:</strong>
+
+                                    <template lwc:if={event.isCompleted}>
+                                        <span class="status-completed">
+                                            EVENT COMPLETED
+                                        </span>
+                                    </template>
+
+                                    <template lwc:elseif={event.isCancelled}>
+                                        <span class="status-cancelled">
+                                            CANCELLED
+                                        </span>
+                                    </template>
+
+                                    <template lwc:elseif={event.isSoldOut}>
+                                        <span class="status-sold-out">
+                                            SOLD OUT
+                                        </span>
+                                    </template>
+
+                                    <template lwc:else>
+                                        {event.eventStatus}
+                                    </template>
+                                </p>
+
+                                <p>
+                                    <strong>Starts:</strong>
+                                    <lightning-formatted-date-time value={event.startDateTime} year="numeric"
+                                        month="short" day="2-digit" hour="2-digit" minute="2-digit">
+                                    </lightning-formatted-date-time>
+                                </p>
+
+                                <template lwc:if={event.canBook}>
+                                    <div class="slds-m-top_medium">
+                                        <lightning-button label="Book Tickets" variant="brand" data-id={event.Id}
+                                            onclick={handleBookTickets}>
+                                        </lightning-button>
+                                    </div>
+                                </template>
+
+                                <template lwc:else>
+                                    <div class="slds-m-top_medium">
+                                        <lightning-button label="Booking Unavailable" variant="neutral" disabled>
+                                        </lightning-button>
+                                    </div>
+                                </template>
+
+                            </article>
+                        </template>
+                    </div>
+                </template>
+
+                <template lwc:else>
+                    <p>No events are available right now.</p>
+                </template>
+            </template>
+
+            <template lwc:if={loading}>
+                <lightning-spinner alternative-text="Loading events" size="medium">
+                </lightning-spinner>
+            </template>
+
+        </div>
+    </lightning-card>
+</template>

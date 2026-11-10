@@ -1,0 +1,40 @@
+<template>
+    <section class="discovery-shell">
+        <div class="hero slds-p-around_x-large">
+            <p class="eyebrow">EPICEVENTZ</p>
+            <h1>Make your next moment unforgettable.</h1>
+            <p>Discover remarkable events, handpicked for your city and your calendar.</p>
+        </div>
+        <div class="filters slds-grid slds-wrap slds-gutters slds-p-around_medium">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <lightning-input label="Search events" value={searchKey} onchange={handleSearchChange}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <lightning-input label="Category" value={category} onchange={handleCategoryChange}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <lightning-input label="City" value={city} onchange={handleCityChange}></lightning-input>
+            </div>
+        </div>
+        <div class="slds-p-around_medium">
+            <template if:true={errorMessage}>
+                <div class="slds-notify slds-notify_alert slds-alert_error">{errorMessage}</div>
+            </template>
+            <div class="event-grid">
+                <template for:each={events} for:item="event">
+                    <article class="event-card" key={event.Id}>
+                        <div class="event-card__poster" style={event.posterStyle}>
+                            <span>{event.Name}</span>
+                        </div>
+                        <div class="slds-p-around_medium">
+                            <h2>{event.Name}</h2>
+                            <p>{event.displayCategory} · {event.displayCity}</p>
+                            <p>{event.displayDate} · {event.displayPrice}</p>
+                            <lightning-button variant="brand" label="View event" data-event-id={event.Id} onclick={handleEventClick}></lightning-button>
+                        </div>
+                    </article>
+                </template>
+            </div>
+        </div>
+    </section>
+</template>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>67.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <decisions>
+        <name>Validate_Promotion</name>
+        <label>Validate Promotion</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Default Outcome</defaultConnectorLabel>
+        <rules>
+            <name>Promotion_Valid</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Get_Promotion.Active__c</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <conditions>
+                <leftValueReference>Get_Promotion.Id</leftValueReference>
+                <operator>IsNull</operator>
+                <rightValue>
+                    <booleanValue>false</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Apply_Promo_Code_Discount</targetReference>
+            </connector>
+            <label>Promotion Valid</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>CalculatedDiscount</name>
+        <dataType>Currency</dataType>
+        <expression>IF(
+    TEXT({!Get_Promotion.Discount_Type__c}) = &quot;Percentage&quot;,
+    {!$Record.Total_Amount__c} * {!Get_Promotion.Discount_Value__c} / 100,
+    MIN(
+        {!Get_Promotion.Discount_Value__c},
+        {!$Record.Total_Amount__c}
+    )
+)</expression>
+        <scale>2</scale>
+    </formulas>
+    <formulas>
+        <name>FinalBookingAmount</name>
+        <dataType>Currency</dataType>
+        <expression>{!$Record.Total_Amount__c} - {!CalculatedDiscount}</expression>
+        <scale>2</scale>
+    </formulas>
+    <interviewLabel>EpicEventz Promo Code Discount Automation {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>EpicEventz Promo Code Discount Automation</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <recordLookups>
+        <name>Get_Promotion</name>
+        <label>Get Promotion</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignNullValuesIfNoRecordsFound>false</assignNullValuesIfNoRecordsFound>
+        <connector>
+            <targetReference>Validate_Promotion</targetReference>
+        </connector>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Promotion_Code__c</field>
+            <operator>EqualTo</operator>
+            <value>
+                <elementReference>$Record.Promo_Code__c</elementReference>
+            </value>
+        </filters>
+        <getFirstRecordOnly>true</getFirstRecordOnly>
+        <object>Promotion__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordLookups>
+    <recordUpdates>
+        <name>Apply_Promo_Code_Discount</name>
+        <label>Apply Promo Code Discount</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <inputAssignments>
+            <field>Discount_Amount__c</field>
+            <value>
+                <elementReference>CalculatedDiscount</elementReference>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Discount_Applied__c</field>
+            <value>
+                <booleanValue>true</booleanValue>
+            </value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Total_Amount__c</field>
+            <value>
+                <elementReference>FinalBookingAmount</elementReference>
+            </value>
+        </inputAssignments>
+        <inputReference>$Record</inputReference>
+    </recordUpdates>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Get_Promotion</targetReference>
+        </connector>
+        <doesRequireRecordChangedToMeetCriteria>true</doesRequireRecordChangedToMeetCriteria>
+        <filterLogic>and</filterLogic>
+        <filters>
+            <field>Promo_Code__c</field>
+            <operator>IsNull</operator>
+            <value>
+                <booleanValue>false</booleanValue>
+            </value>
+        </filters>
+        <object>Booking__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

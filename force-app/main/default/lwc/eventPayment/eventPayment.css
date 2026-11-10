@@ -1,0 +1,143 @@
+.payment-container {
+    max-width: 760px;
+    margin: 32px auto;
+    padding: 20px;
+}
+
+.payment-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 32px;
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #16325c;
+}
+
+.header p {
+    color: #667085;
+    margin-top: 8px;
+}
+
+.booking-summary {
+    background: #f5f8fc;
+    padding: 22px;
+    border-radius: 12px;
+    margin-bottom: 26px;
+}
+
+.booking-summary h2,
+.payment-form h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 18px;
+}
+
+.booking-summary p {
+    margin: 12px 0;
+    overflow-wrap: anywhere;
+}
+
+.total {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #d8dee8;
+    font-size: 20px;
+    font-weight: 700;
+    color: #0176d3;
+}
+
+.payment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+.simulation-notice {
+    padding: 14px;
+    border-radius: 8px;
+    background: #fff7e6;
+    border: 1px solid #f5d28a;
+    color: #694b00;
+}
+
+.pay-button {
+    display: block;
+    margin-top: 8px;
+}
+
+.success-panel,
+.failure-panel {
+    text-align: center;
+    padding: 24px 12px;
+}
+
+.success-panel h2,
+.failure-panel h2 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 16px 0;
+}
+
+.success-panel h2 {
+    color: #16803c;
+}
+
+.failure-panel h2 {
+    color: #ba0517;
+}
+
+.success-panel p,
+.failure-panel p {
+    margin: 12px 0;
+    overflow-wrap: anywhere;
+}
+
+.status-icon {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e3fcef;
+    color: #16803c;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.error-message {
+    padding: 14px;
+    margin-bottom: 20px;
+    background: #fff0f0;
+    border: 1px solid #e5a1a1;
+    border-radius: 8px;
+    color: #ba0517;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+    .payment-container {
+        margin: 12px auto;
+        padding: 10px;
+    }
+
+    .payment-card {
+        padding: 20px;
+    }
+
+    .header h1 {
+        font-size: 23px;
+    }
+}

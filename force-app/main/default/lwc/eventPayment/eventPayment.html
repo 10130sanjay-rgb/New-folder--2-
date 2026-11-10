@@ -1,0 +1,153 @@
+<template>
+    <div class="payment-container">
+        <div class="payment-card">
+            <div class="header">
+                <h1>Complete Your Booking</h1>
+                <p>EpicEventz secure payment simulation</p>
+            </div>
+
+            <template lwc:if={isLoading}>
+                <lightning-spinner
+                    alternative-text="Loading booking details"
+                    size="medium">
+                </lightning-spinner>
+            </template>
+
+            <template lwc:if={errorMessage}>
+                <div class="error-message">
+                    {errorMessage}
+                </div>
+            </template>
+
+            <template lwc:if={showPaymentForm}>
+                <div class="booking-summary">
+                    <h2>Booking Summary</h2>
+
+                    <p>
+                        <strong>Event:</strong>
+                        {paymentDetails.eventName}
+                    </p>
+
+                    <p>
+                        <strong>Ticket:</strong>
+                        {paymentDetails.ticketName}
+                    </p>
+
+                    <p>
+                        <strong>Ticket Code:</strong>
+                        {paymentDetails.ticketCode}
+                    </p>
+
+                    <p>
+                        <strong>Quantity:</strong>
+                        {paymentDetails.quantity}
+                    </p>
+
+                    <div class="total">
+                        <span>Total Amount</span>
+                        <span>₹{formattedAmount}</span>
+                    </div>
+                </div>
+
+                <div class="payment-form">
+                    <h2>Select Payment Method</h2>
+
+                    <lightning-radio-group
+                        name="paymentMethod"
+                        label="Payment method"
+                        options={paymentMethods}
+                        value={selectedMethod}
+                        type="radio"
+                        onchange={handleMethodChange}>
+                    </lightning-radio-group>
+
+                    <div class="simulation-notice">
+                        <strong>Demo mode:</strong>
+                        No real money will be collected.
+                    </div>
+
+                    <lightning-radio-group
+                        name="paymentOutcome"
+                        label="Choose a test outcome"
+                        options={outcomeOptions}
+                        value={paymentOutcome}
+                        type="radio"
+                        onchange={handleOutcomeChange}>
+                    </lightning-radio-group>
+
+                    <lightning-button
+                        class="pay-button"
+                        variant="brand"
+                        label="Pay Now"
+                        onclick={handlePay}
+                        disabled={isPaymentDisabled}>
+                    </lightning-button>
+
+                    <template lwc:if={isProcessing}>
+                        <lightning-spinner
+                            alternative-text="Processing payment"
+                            size="small">
+                        </lightning-spinner>
+                    </template>
+                </div>
+            </template>
+
+            <template lwc:if={showSuccess}>
+                <div class="success-panel">
+                    <div class="status-icon">✓</div>
+
+                    <h2>Payment Successful!</h2>
+
+                    <p>Your booking is confirmed.</p>
+
+                    <p>
+                        <strong>Transaction ID:</strong>
+                        {paymentResult.transactionId}
+                    </p>
+
+                    <p>
+                        <strong>Ticket Code:</strong>
+                        {paymentDetails.ticketCode}
+                    </p>
+
+                    <p>
+                        <strong>Amount Paid:</strong>
+                        ₹{formattedAmount}
+                    </p>
+
+                    <lightning-button
+                        label="Back to Events"
+                        variant="brand"
+                        onclick={handleBackToEvents}>
+                    </lightning-button>
+                </div>
+            </template>
+
+            <template lwc:if={showFailure}>
+                <div class="failure-panel">
+                    <h2>Payment Failed</h2>
+
+                    <p>
+                        Your booking remains pending while it is valid.
+                    </p>
+
+                    <p>
+                        <strong>Transaction ID:</strong>
+                        {paymentResult.transactionId}
+                    </p>
+
+                    <lightning-button
+                        label="Try Again"
+                        variant="brand"
+                        onclick={handleRetry}>
+                    </lightning-button>
+
+                    <lightning-button
+                        label="Back to Events"
+                        onclick={handleBackToEvents}>
+                    </lightning-button>
+                </div>
+            </template>
+        </div>
+    </div>
+</template>

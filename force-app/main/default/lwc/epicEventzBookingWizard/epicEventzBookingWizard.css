@@ -1,0 +1,6 @@
+:host { display: block; }
+.wizard { background: #f7f8fc; }
+.steps { gap: .5rem; flex-wrap: wrap; }
+.step { padding: .5rem .75rem; color: #68728b; font-size: .75rem; border-bottom: 2px solid #dfe4ed; }
+.step--active { color: #e1262f; font-weight: 800; border-color: #e1262f; }
+.summary { background: #fff; }
