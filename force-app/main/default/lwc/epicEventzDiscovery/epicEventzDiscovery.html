@@ -13,7 +13,7 @@
                 <lightning-input label="Category" value={category} onchange={handleCategoryChange}></lightning-input>
             </div>
             <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
-                <lightning-input label="City" value={city} onchange={handleCityChange}></lightning-input>
+                <lightning-input label="Event type" value={eventType} onchange={handleEventTypeChange}></lightning-input>
             </div>
         </div>
         <div class="slds-p-around_medium">
@@ -24,7 +24,7 @@
                         <lightning-button label="Back to events" variant="base" onclick={handleBackToEvents}></lightning-button>
                         <p class="eyebrow event-detail__eyebrow">EVENT DETAILS</p>
                         <h2 id="event-detail-title">{selectedEvent.Name}</h2>
-                        <p class="event-detail__category">{selectedEvent.displayCategory} · {selectedEvent.displayCity}</p>
+                        <p class="event-detail__category">{selectedEvent.displayCategory} · {selectedEvent.displayEventType}</p>
                         <dl class="event-detail__facts">
                             <div>
                                 <dt>Date</dt>
@@ -32,7 +32,7 @@
                             </div>
                             <div>
                                 <dt>Location</dt>
-                                <dd>{selectedEvent.displayCity}</dd>
+                                <dd>To be announced</dd>
                             </div>
                             <div>
                                 <dt>Starting price</dt>
@@ -67,7 +67,7 @@
                                 </div>
                                 <div class="slds-p-around_medium">
                                     <h2>{event.Name}</h2>
-                                    <p>{event.displayCategory} · {event.displayCity}</p>
+                                    <p>{event.displayCategory} · {event.displayEventType}</p>
                                     <p>{event.displayDate} · {event.displayPrice}</p>
                                     <lightning-button variant="brand" label="View event" data-event-id={event.Id} onclick={handleEventClick}></lightning-button>
                                 </div>

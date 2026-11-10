@@ -1,0 +1,9 @@
+{
+  "orgName": "EpicEventz Scratch Org",
+  "edition": "Developer",
+  "settings": {
+    "deploymentSettings": {
+      "doesSkipAsyncApexValidation": true
+    }
+  }
+}

@@ -1,11 +1,12 @@
 public with sharing class EpicEventzCatalogController {
     @AuraEnabled(cacheable=true)
-    public static List<Event__c> getPublishedEvents(String searchKey, String category, String city) {
+    public static List<Event__c> getPublishedEvents(String searchKey, String category, String eventType) {
         Map<String, Schema.SObjectField> fields = Event__c.SObjectType.getDescribe().fields.getMap();
         List<String> selectedFields = new List<String>{ 'Id', 'Name' };
         for (String fieldName : new List<String>{
-            'Category__c', 'City__c', 'Start_Date_Time__c', 'Start_Date__c',
-            'Base_Price__c', 'Poster_URL__c', 'Status__c'
+            'Event_Category__c', 'Event_Type__c', 'Event_Description__c',
+            'Start_Date_Time__c', 'Start_Date__c', 'Base_Price__c',
+            'Poster_URL__c', 'Event_Status__c', 'Status__c'
         }) {
             if (fields.containsKey(fieldName)) {
                 selectedFields.add(fieldName);
@@ -14,16 +15,21 @@ public with sharing class EpicEventzCatalogController {
 
         List<String> conditions = new List<String>();
         Map<String, Object> binds = new Map<String, Object>();
-        String publishedStatus = 'Published';
-        if (fields.containsKey('Status__c')
-            && fields.get('Status__c').getDescribe().getType() == Schema.DisplayType.Picklist) {
-            conditions.add('Status__c = :publishedStatus');
-            binds.put('publishedStatus', publishedStatus);
+        String statusField = fields.containsKey('Event_Status__c')
+            ? 'Event_Status__c'
+            : fields.containsKey('Status__c')
+                ? 'Status__c'
+                : null;
+        if (statusField == null
+            || fields.get(statusField).getDescribe().getType() != Schema.DisplayType.Picklist) {
+            return new List<Event__c>();
         }
 
+        conditions.add(statusField + ' IN :publishedStatuses');
+        binds.put('publishedStatuses', new Set<String>{ 'Published', 'Registration Open' });
         addTextFilter(fields, conditions, binds, 'Name', searchKey, 'searchKey');
-        addTextFilter(fields, conditions, binds, 'Category__c', category, 'category');
-        addTextFilter(fields, conditions, binds, 'City__c', city, 'city');
+        addTextFilter(fields, conditions, binds, 'Event_Category__c', category, 'category');
+        addTextFilter(fields, conditions, binds, 'Event_Type__c', eventType, 'eventType');
 
         String query = 'SELECT ' + String.join(selectedFields, ', ')
             + ' FROM Event__c';

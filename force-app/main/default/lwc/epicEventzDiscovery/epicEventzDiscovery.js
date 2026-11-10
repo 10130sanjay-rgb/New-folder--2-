@@ -5,7 +5,7 @@ import getPublishedEvents from '@salesforce/apex/EpicEventzCatalogController.get
 export default class EpicEventzDiscovery extends NavigationMixin(LightningElement) {
     searchKey = '';
     category = '';
-    city = '';
+    eventType = '';
     events = [];
     selectedEvent;
     isLoading = true;
@@ -22,14 +22,14 @@ export default class EpicEventzDiscovery extends NavigationMixin(LightningElemen
     @wire(getPublishedEvents, {
         searchKey: '$searchKey',
         category: '$category',
-        city: '$city'
+        eventType: '$eventType'
     })
     wiredEvents({ data, error }) {
         if (data) {
             this.events = data.map((event) => ({
                 ...event,
-                displayCategory: event.Category__c || 'Featured event',
-                displayCity: event.City__c || 'Your city',
+                displayCategory: event.Event_Category__c || 'Featured event',
+                displayEventType: event.Event_Type__c || 'Event',
                 displayDate: this.formatDate(event.Start_Date_Time__c || event.Start_Date__c),
                 displayPrice: event.Base_Price__c ? `$${event.Base_Price__c}` : 'Price on request',
                 posterStyle: event.Poster_URL__c
@@ -55,8 +55,8 @@ export default class EpicEventzDiscovery extends NavigationMixin(LightningElemen
         this.refreshResults();
     }
 
-    handleCityChange(event) {
-        this.city = event.target.value;
+    handleEventTypeChange(event) {
+        this.eventType = event.target.value;
         this.refreshResults();
     }
 
