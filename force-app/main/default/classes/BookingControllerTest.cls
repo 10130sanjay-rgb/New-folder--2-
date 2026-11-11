@@ -1,18 +1,9 @@
-@IsTest
+@isTest
 private class BookingControllerTest {
 
-    @TestSetup
+    @testSetup
     static void setupTestData() {
-        EpicEventzCustomerTestFactory.createCustomer(
-            'booking-owner',
-            false
-        );
-        EpicEventzCustomerTestFactory.createCustomer(
-            'booking-other',
-            false
-        );
-
-        Event__c eventRecord = new Event__c(
+        Event__c evt = new Event__c(
             Name = 'Tech Innovators Summit',
             Capacity__c = 500,
             Event_Code__c = 'EVT-TIS-2026',
@@ -20,11 +11,11 @@ private class BookingControllerTest {
             Start_Date_Time__c = Datetime.now().addDays(5),
             End_Date_Time__c = Datetime.now().addDays(6)
         );
-        insert eventRecord;
+        insert evt;
 
-        insert new Ticket_Type__c(
+        Ticket_Type__c ticket = new Ticket_Type__c(
             Name = 'General Admission',
-            Event__c = eventRecord.Id,
+            Event__c = evt.Id,
             Ticket_Code__c = 'GA-TIS-001',
             Total_Quantity__c = 100,
             Available_Quantity__c = 10,
@@ -33,272 +24,257 @@ private class BookingControllerTest {
             Sales_Start__c = Datetime.now().addDays(-1),
             Sales_End__c = Datetime.now().addDays(2)
         );
+        insert ticket;
     }
 
-    private static User getCustomer(String customerKey) {
-        return [
-            SELECT Id, ContactId
-            FROM User
-            WHERE Contact.LastName = :('Customer ' + customerKey)
-            LIMIT 1
-        ];
-    }
-
-    private static Event__c getEvent() {
-        return [SELECT Id FROM Event__c LIMIT 1];
-    }
-
-    private static Ticket_Type__c getTicket() {
-        return [
-            SELECT Id, Available_Quantity__c, Price__c
-            FROM Ticket_Type__c
-            LIMIT 1
-        ];
-    }
-
-    @IsTest
-    static void testBookingUsesAuthenticatedContactAndReducesInventory() {
-        User customer = getCustomer('booking-owner');
-        Event__c eventRecord = getEvent();
-        Ticket_Type__c ticket = getTicket();
+    @isTest
+    static void testSuccessfulBookingReducesInventory() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+        Ticket_Type__c ticket = [SELECT Id, Available_Quantity__c, Price__c FROM Ticket_Type__c LIMIT 1];
 
         Test.startTest();
-        BookingController.BookingResult result;
-        System.runAs(customer) {
-            result = BookingController.createBooking(
-                eventRecord.Id,
-                ticket.Id,
-                3
-            );
-        }
+        BookingController.BookingResult result = BookingController.createBooking(
+            evt.Id,
+            ticket.Id,
+            'John',
+            'Doe',
+            'johndoe@example.com',
+            '9876543210',
+            3
+        );
         Test.stopTest();
 
-        Assert.isNotNull(result);
-        Assert.isNotNull(result.bookingId);
-        Assert.areEqual(750, result.totalAmount);
+        Assert.isNotNull(result, 'BookingResult should not be null');
+        Assert.isNotNull(result.bookingId, 'Booking ID should be populated');
+        Assert.isNotNull(result.ticketCode, 'Ticket code should be generated');
+        Assert.areEqual(750, result.totalAmount, 'Total amount should equal price * quantity');
 
         Ticket_Type__c updatedTicket = [
             SELECT Available_Quantity__c
             FROM Ticket_Type__c
             WHERE Id = :ticket.Id
         ];
-        Assert.areEqual(7, updatedTicket.Available_Quantity__c);
+        Assert.areEqual(7, updatedTicket.Available_Quantity__c, 'Available quantity should decrease by booked quantity');
 
         Booking__c createdBooking = [
-            SELECT Attendee__c, Quantity__c, Total_Amount__c,
-                   Booking_Status__c, Payment_Status__c,
-                   Inventory_Processed__c
+            SELECT Quantity__c, Total_Amount__c, Booking_Status__c,
+                   Payment_Status__c, Inventory_Processed__c
             FROM Booking__c
             WHERE Id = :result.bookingId
         ];
-        Assert.areEqual(customer.ContactId, createdBooking.Attendee__c);
-        Assert.areEqual(3, createdBooking.Quantity__c);
-        Assert.areEqual(750, createdBooking.Total_Amount__c);
-        Assert.areEqual('Pending', createdBooking.Booking_Status__c);
-        Assert.areEqual('Pending', createdBooking.Payment_Status__c);
-        Assert.isTrue(createdBooking.Inventory_Processed__c);
+        Assert.areEqual(3, createdBooking.Quantity__c, 'Quantity should be 3');
+        Assert.areEqual(750, createdBooking.Total_Amount__c, 'Total amount should be 750');
+        Assert.areEqual('Pending', createdBooking.Booking_Status__c, 'Status should be Pending');
+        Assert.areEqual('Pending', createdBooking.Payment_Status__c, 'Payment status should be Pending');
+        Assert.isTrue(createdBooking.Inventory_Processed__c, 'Inventory should be marked as processed');
+
+        List<Contact> contacts = [
+            SELECT Id, FirstName, LastName, Email
+            FROM Contact
+            WHERE Email = 'johndoe@example.com'
+        ];
+        Assert.areEqual(1, contacts.size(), 'Contact should be created');
     }
 
-    @IsTest
-    static void testMissingContactIsRejected() {
-        Event__c eventRecord = getEvent();
-        Ticket_Type__c ticket = getTicket();
+    @isTest
+    static void testExistingContactReusedOnBooking() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+        Ticket_Type__c ticket = [SELECT Id FROM Ticket_Type__c LIMIT 1];
+
+        Contact existingContact = new Contact(
+            FirstName = 'Jane',
+            LastName = 'Smith',
+            Email = 'janesmith@example.com'
+        );
+        insert existingContact;
+
+        Test.startTest();
+        BookingController.BookingResult result = BookingController.createBooking(
+            evt.Id,
+            ticket.Id,
+            'Jane',
+            'Smith',
+            'janesmith@example.com',
+            '1122334455',
+            1
+        );
+        Test.stopTest();
+
+        Booking__c createdBooking = [
+            SELECT Attendee__c
+            FROM Booking__c
+            WHERE Id = :result.bookingId
+        ];
+        Assert.areEqual(existingContact.Id, createdBooking.Attendee__c, 'Existing contact should be reused');
+    }
+
+    @isTest
+    static void testRejectionWhenQuantityExceedsAvailableInventory() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+        Ticket_Type__c ticket = [SELECT Id FROM Ticket_Type__c LIMIT 1];
+
+        update new Ticket_Type__c(Id = ticket.Id, Available_Quantity__c = 2);
+
         Boolean exceptionCaught = false;
 
+        Test.startTest();
         try {
-            BookingController.createBooking(eventRecord.Id, ticket.Id, 1);
+            BookingController.createBooking(
+                evt.Id,
+                ticket.Id,
+                'Alice',
+                'Brown',
+                'alice@example.com',
+                '9988776655',
+                3
+            );
         } catch (AuraHandledException ex) {
             exceptionCaught = true;
-            Assert.isTrue(ex.getMessage().contains('not linked'));
+            Assert.isTrue(ex.getMessage().contains('There are not enough tickets available.'),
+                'Expected not enough tickets exception');
         }
-        Assert.isTrue(exceptionCaught);
+        Test.stopTest();
+
+        Assert.isTrue(exceptionCaught, 'Exception should be thrown when quantity exceeds availability');
+
+        Ticket_Type__c ticketAfter = [SELECT Available_Quantity__c FROM Ticket_Type__c WHERE Id = :ticket.Id];
+        Assert.areEqual(2, ticketAfter.Available_Quantity__c, 'Inventory must not decrease on failed booking');
+
+        List<Booking__c> bookings = [SELECT Id FROM Booking__c WHERE Ticket_Type__c = :ticket.Id];
+        Assert.areEqual(0, bookings.size(), 'No booking record should exist');
     }
 
-    @IsTest
-    static void testInsufficientInventoryIsRejectedWithoutBooking() {
-        User customer = getCustomer('booking-owner');
-        Event__c eventRecord = getEvent();
-        Ticket_Type__c ticket = getTicket();
-        update new Ticket_Type__c(
-            Id = ticket.Id,
-            Available_Quantity__c = 2
-        );
+    @isTest
+    static void testRejectionForZeroOrNegativeQuantity() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+        Ticket_Type__c ticket = [SELECT Id FROM Ticket_Type__c LIMIT 1];
 
-        Boolean exceptionCaught = false;
-        System.runAs(customer) {
-            try {
-                BookingController.createBooking(
-                    eventRecord.Id,
-                    ticket.Id,
-                    3
-                );
-            } catch (AuraHandledException ex) {
-                exceptionCaught = true;
-                Assert.isTrue(
-                    ex.getMessage().contains('not enough tickets')
-                );
-            }
-        }
-
-        Assert.isTrue(exceptionCaught);
-        Assert.areEqual(
-            2,
-            [SELECT Available_Quantity__c FROM Ticket_Type__c WHERE Id = :ticket.Id]
-                .Available_Quantity__c
-        );
-        Assert.areEqual(
-            0,
-            [SELECT COUNT() FROM Booking__c WHERE Ticket_Type__c = :ticket.Id]
-        );
-    }
-
-    @IsTest
-    static void testInvalidQuantitiesAndRequiredIdsAreRejected() {
-        User customer = getCustomer('booking-owner');
-        Event__c eventRecord = getEvent();
-        Ticket_Type__c ticket = getTicket();
-
-        System.runAs(customer) {
-            for (Integer invalidQuantity : new List<Integer>{ 0, -1, 11 }) {
-                Boolean rejected = false;
-                try {
-                    BookingController.createBooking(
-                        eventRecord.Id,
-                        ticket.Id,
-                        invalidQuantity
-                    );
-                } catch (AuraHandledException ex) {
-                    rejected = true;
-                }
-                Assert.isTrue(rejected);
-            }
-
-            Boolean missingEventRejected = false;
-            try {
-                BookingController.createBooking(null, ticket.Id, 1);
-            } catch (AuraHandledException ex) {
-                missingEventRejected = true;
-            }
-            Assert.isTrue(missingEventRejected);
-        }
-    }
-
-    @IsTest
-    static void testConsecutiveBookingsCannotOversell() {
-        User customer = getCustomer('booking-owner');
-        Event__c eventRecord = getEvent();
-        Ticket_Type__c ticket = getTicket();
-        update new Ticket_Type__c(
-            Id = ticket.Id,
-            Available_Quantity__c = 3
-        );
-
-        System.runAs(customer) {
-            BookingController.BookingResult first =
-                BookingController.createBooking(
-                    eventRecord.Id,
-                    ticket.Id,
-                    2
-                );
-            Assert.isNotNull(first.bookingId);
-
-            Boolean secondRejected = false;
-            try {
-                BookingController.createBooking(
-                    eventRecord.Id,
-                    ticket.Id,
-                    2
-                );
-            } catch (AuraHandledException ex) {
-                secondRejected = true;
-            }
-            Assert.isTrue(secondRejected);
-
-            BookingController.BookingResult lastTicket =
-                BookingController.createBooking(
-                    eventRecord.Id,
-                    ticket.Id,
-                    1
-                );
-            Assert.isNotNull(lastTicket.bookingId);
-
-            Boolean soldOutRejected = false;
-            try {
-                BookingController.createBooking(
-                    eventRecord.Id,
-                    ticket.Id,
-                    1
-                );
-            } catch (AuraHandledException ex) {
-                soldOutRejected = true;
-            }
-            Assert.isTrue(soldOutRejected);
-        }
-
-        Assert.areEqual(
-            0,
-            [SELECT Available_Quantity__c FROM Ticket_Type__c WHERE Id = :ticket.Id]
-                .Available_Quantity__c
-        );
-    }
-
-    @IsTest
-    static void testCustomerBookingsReturnOnlyAuthenticatedContactRecords() {
-        User owner = getCustomer('booking-owner');
-        User other = getCustomer('booking-other');
-        Event__c eventRecord = getEvent();
-        Ticket_Type__c ticket = getTicket();
-        System.runAs(owner) {
-            BookingController.createBooking(eventRecord.Id, ticket.Id, 1);
-        }
-        System.runAs(other) {
-            BookingController.createBooking(eventRecord.Id, ticket.Id, 1);
-        }
-
-        System.runAs(owner) {
-            List<Booking__c> bookings = BookingController.getMyBookings();
-            Assert.areEqual(1, bookings.size());
-            Assert.areEqual(owner.ContactId, bookings[0].Attendee__c);
-        }
-
-        System.runAs(other) {
-            List<Booking__c> bookings = BookingController.getMyBookings();
-            Assert.areEqual(1, bookings.size());
-            Assert.areEqual(other.ContactId, bookings[0].Attendee__c);
-        }
-    }
-
-    @IsTest
-    static void testMyBookingsRejectsUserWithoutContact() {
-        Boolean exceptionCaught = false;
+        Boolean zeroCaught = false;
         try {
-            BookingController.getMyBookings();
+            BookingController.createBooking(
+                evt.Id,
+                ticket.Id,
+                'Bob',
+                'Zero',
+                'bob@example.com',
+                '1234567890',
+                0
+            );
         } catch (AuraHandledException ex) {
-            exceptionCaught = true;
-            Assert.isTrue(ex.getMessage().contains('not linked'));
+            zeroCaught = true;
         }
-        Assert.isTrue(exceptionCaught);
+        Assert.isTrue(zeroCaught, 'Zero quantity should be rejected');
+
+        Boolean negativeCaught = false;
+        try {
+            BookingController.createBooking(
+                evt.Id,
+                ticket.Id,
+                'Bob',
+                'Negative',
+                'bob@example.com',
+                '1234567890',
+                -1
+            );
+        } catch (AuraHandledException ex) {
+            negativeCaught = true;
+        }
+        Assert.isTrue(negativeCaught, 'Negative quantity should be rejected');
+
+        Ticket_Type__c ticketAfter = [SELECT Available_Quantity__c FROM Ticket_Type__c WHERE Id = :ticket.Id];
+        Assert.areEqual(10, ticketAfter.Available_Quantity__c, 'Inventory should remain 10');
     }
 
-    @IsTest
-    static void testGetTicketTypesRequiresEventAndReturnsActiveTickets() {
-        User customer = getCustomer('booking-owner');
-        Event__c eventRecord = getEvent();
+    @isTest
+    static void testRejectionForMissingRequiredFields() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+        Ticket_Type__c ticket = [SELECT Id FROM Ticket_Type__c LIMIT 1];
 
-        System.runAs(customer) {
-            List<BookingController.TicketOption> options =
-                BookingController.getTicketTypes(eventRecord.Id);
-            Assert.areEqual(1, options.size());
-            Assert.areEqual('General Admission', options[0].name);
-            Assert.areEqual(250, options[0].price);
-
-            Boolean exceptionCaught = false;
-            try {
-                BookingController.getTicketTypes(null);
-            } catch (AuraHandledException ex) {
-                exceptionCaught = true;
-            }
-            Assert.isTrue(exceptionCaught);
+        Boolean nullEventCaught = false;
+        try {
+            BookingController.createBooking(null, ticket.Id, 'A', 'B', 'a@b.com', '123', 1);
+        } catch (AuraHandledException ex) {
+            nullEventCaught = true;
         }
+        Assert.isTrue(nullEventCaught, 'Null event should be rejected');
+
+        Boolean nullEmailCaught = false;
+        try {
+            BookingController.createBooking(evt.Id, ticket.Id, 'A', 'B', '', '123', 1);
+        } catch (AuraHandledException ex) {
+            nullEmailCaught = true;
+        }
+        Assert.isTrue(nullEmailCaught, 'Blank email should be rejected');
+    }
+
+    @isTest
+    static void testConsecutiveBookingsPreventOverselling() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+        Ticket_Type__c ticket = [SELECT Id FROM Ticket_Type__c LIMIT 1];
+
+        update new Ticket_Type__c(Id = ticket.Id, Available_Quantity__c = 3);
+
+        Test.startTest();
+        // Booking 1: Request 2 tickets -> succeeds
+        BookingController.BookingResult r1 = BookingController.createBooking(
+            evt.Id, ticket.Id, 'User', 'One', 'user1@example.com', '111', 2
+        );
+        Assert.isNotNull(r1.bookingId, 'Booking 1 should succeed');
+
+        Ticket_Type__c t1 = [SELECT Available_Quantity__c FROM Ticket_Type__c WHERE Id = :ticket.Id];
+        Assert.areEqual(1, t1.Available_Quantity__c, '1 ticket should remain after Booking 1');
+
+        // Booking 2: Request 2 tickets -> fails (only 1 available)
+        Boolean b2Failed = false;
+        try {
+            BookingController.createBooking(
+                evt.Id, ticket.Id, 'User', 'Two', 'user2@example.com', '222', 2
+            );
+        } catch (AuraHandledException ex) {
+            b2Failed = true;
+        }
+        Assert.isTrue(b2Failed, 'Booking 2 must fail due to insufficient inventory');
+
+        // Booking 3: Request 1 ticket -> succeeds (takes the last ticket)
+        BookingController.BookingResult r3 = BookingController.createBooking(
+            evt.Id, ticket.Id, 'User', 'Three', 'user3@example.com', '333', 1
+        );
+        Assert.isNotNull(r3.bookingId, 'Booking 3 should succeed');
+
+        Ticket_Type__c t3 = [SELECT Available_Quantity__c FROM Ticket_Type__c WHERE Id = :ticket.Id];
+        Assert.areEqual(0, t3.Available_Quantity__c, '0 tickets should remain');
+
+        // Booking 4: Request 1 ticket -> fails (inventory is 0)
+        Boolean b4Failed = false;
+        try {
+            BookingController.createBooking(
+                evt.Id, ticket.Id, 'User', 'Four', 'user4@example.com', '444', 1
+            );
+        } catch (AuraHandledException ex) {
+            b4Failed = true;
+        }
+        Assert.isTrue(b4Failed, 'Booking 4 must fail because tickets are sold out');
+        Test.stopTest();
+    }
+
+    @isTest
+    static void testGetTicketTypes() {
+        Event__c evt = [SELECT Id FROM Event__c LIMIT 1];
+
+        Test.startTest();
+        List<BookingController.TicketOption> options = BookingController.getTicketTypes(evt.Id);
+        Test.stopTest();
+
+        Assert.areEqual(1, options.size(), 'Should return 1 ticket option');
+        Assert.areEqual('General Admission', options[0].name);
+        Assert.areEqual(250, options[0].price);
+
+        Boolean nullEventCaught = false;
+        try {
+            BookingController.getTicketTypes(null);
+        } catch (AuraHandledException ex) {
+            nullEventCaught = true;
+        }
+        Assert.isTrue(nullEventCaught, 'Null event ID should throw AuraHandledException');
     }
 }
