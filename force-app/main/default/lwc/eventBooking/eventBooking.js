@@ -4,7 +4,7 @@ import {
     NavigationMixin
 } from 'lightning/navigation';
 
-import getEvents from '@salesforce/apex/EventController.getEvents';
+import getPublishedEvents from '@salesforce/apex/EpicEventzCatalogController.getPublishedEvents';
 import getTicketTypes from '@salesforce/apex/BookingController.getTicketTypes';
 import createBooking from '@salesforce/apex/BookingController.createBooking';
 
@@ -19,10 +19,6 @@ export default class EventBooking extends NavigationMixin(LightningElement) {
     selectedTicket = null;
 
     quantity = 1;
-    firstName = '';
-    lastName = '';
-    email = '';
-    phone = '';
 
     isLoading = true;
     isSubmitting = false;
@@ -99,7 +95,11 @@ export default class EventBooking extends NavigationMixin(LightningElement) {
         this.errorMessage = '';
 
         try {
-            const records = await getEvents();
+            const records = await getPublishedEvents({
+                searchKey: null,
+                category: null,
+                eventType: null
+            });
 
             this.eventOptions = records.map((eventRecord) => ({
                 label: eventRecord.Name,
@@ -197,11 +197,6 @@ export default class EventBooking extends NavigationMixin(LightningElement) {
         this.quantity = Number(event.detail.value);
     }
 
-    handleInputChange(event) {
-        const field = event.target.name;
-        this[field] = event.detail.value;
-    }
-
     async handleSubmit(event) {
         event.preventDefault();
 
@@ -246,10 +241,6 @@ export default class EventBooking extends NavigationMixin(LightningElement) {
             const result = await createBooking({
                 eventId: this.selectedEventId,
                 ticketTypeId: this.selectedTicketId,
-                firstName: this.firstName,
-                lastName: this.lastName,
-                email: this.email.trim(),
-                phone: this.phone,
                 quantity: count
             });
 

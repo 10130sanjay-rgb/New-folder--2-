@@ -30,7 +30,7 @@ export default class EpicEventzDiscovery extends NavigationMixin(LightningElemen
                 ...event,
                 displayCategory: event.Event_Category__c || 'Featured event',
                 displayEventType: event.Event_Type__c || 'Event',
-                displayDate: this.formatDate(event.Start_Date_Time__c || event.Start_Date__c),
+                displayDate: this.formatDate(event.Start_Date_Time__c),
                 displayPrice: event.Base_Price__c ? `$${event.Base_Price__c}` : 'Price on request',
                 posterStyle: event.Poster_URL__c
                     ? `background-image: linear-gradient(180deg, transparent, #0b1020), url("${event.Poster_URL__c}")`

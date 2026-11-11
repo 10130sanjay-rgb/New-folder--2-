@@ -112,17 +112,25 @@ export default class EventPayment extends NavigationMixin(LightningElement) {
         return !this.isLoading &&
             !this.errorMessage &&
             !!this.paymentDetails &&
+            this.paymentDetails.canUseSimulator === true &&
             !this.isComplete;
     }
 
     get showSuccess() {
         return this.isComplete &&
-            this.paymentResult?.paymentStatus === 'Successful';
+            this.paymentResult?.simulationOutcome === 'Success';
     }
 
     get showFailure() {
         return this.isComplete &&
-            this.paymentResult?.paymentStatus === 'Failed';
+            this.paymentResult?.simulationOutcome === 'Failure';
+    }
+
+    get showSimulatorUnavailable() {
+        return !this.isLoading &&
+            !this.errorMessage &&
+            !!this.paymentDetails &&
+            this.paymentDetails.canUseSimulator !== true;
     }
 
     handleMethodChange(event) {
@@ -153,24 +161,16 @@ export default class EventPayment extends NavigationMixin(LightningElement) {
 
             this.dispatchEvent(
                 new ShowToastEvent({
-                    title: result.paymentStatus === 'Successful'
-                        ? 'Payment successful'
-                        : 'Payment failed',
+                    title: 'Payment simulation complete',
                     message: result.message,
-                    variant: result.paymentStatus === 'Successful'
-                        ? 'success'
-                        : 'error'
+                    variant: 'info'
                 })
             );
 
-            if (result.paymentStatus === 'Successful') {
-                this.paymentDetails = {
-                    ...this.paymentDetails,
-                    canPay: false,
-                    paymentStatus: 'Paid',
-                    bookingStatus: 'Confirmed'
-                };
-            }
+            this.paymentDetails = {
+                ...this.paymentDetails,
+                canPay: false
+            };
         } catch (error) {
             this.errorMessage =
                 error?.body?.message ||
