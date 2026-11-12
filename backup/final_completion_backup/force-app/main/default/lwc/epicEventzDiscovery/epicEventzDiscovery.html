@@ -1,0 +1,81 @@
+<template>
+    <section class="discovery-shell">
+        <div class="hero slds-p-around_x-large">
+            <p class="eyebrow">EPICEVENTZ</p>
+            <h1>Make your next moment unforgettable.</h1>
+            <p>Discover remarkable events, handpicked for your city and your calendar.</p>
+        </div>
+        <div class="filters slds-grid slds-wrap slds-gutters slds-p-around_medium">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <lightning-input label="Search events" value={searchKey} onchange={handleSearchChange}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <lightning-input label="Category" value={category} onchange={handleCategoryChange}></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-3">
+                <lightning-input label="Event type" value={eventType} onchange={handleEventTypeChange}></lightning-input>
+            </div>
+        </div>
+        <div class="slds-p-around_medium">
+            <template if:true={selectedEvent}>
+                <section class="event-detail" aria-labelledby="event-detail-title">
+                    <div class="event-detail__poster" style={selectedEvent.posterStyle} role="img" aria-label={selectedEvent.Name}></div>
+                    <div class="event-detail__content">
+                        <lightning-button label="Back to events" variant="base" onclick={handleBackToEvents}></lightning-button>
+                        <p class="eyebrow event-detail__eyebrow">EVENT DETAILS</p>
+                        <h2 id="event-detail-title">{selectedEvent.Name}</h2>
+                        <p class="event-detail__category">{selectedEvent.displayCategory} · {selectedEvent.displayEventType}</p>
+                        <dl class="event-detail__facts">
+                            <div>
+                                <dt>Date</dt>
+                                <dd>{selectedEvent.displayDate}</dd>
+                            </div>
+                            <div>
+                                <dt>Location</dt>
+                                <dd>To be announced</dd>
+                            </div>
+                            <div>
+                                <dt>Starting price</dt>
+                                <dd>{selectedEvent.displayPrice}</dd>
+                            </div>
+                        </dl>
+                        <lightning-button variant="brand" label="Book tickets" onclick={handleBookTickets}></lightning-button>
+                    </div>
+                </section>
+            </template>
+            <template if:false={selectedEvent}>
+                <template if:true={isLoading}>
+                    <div class="slds-is-relative loading-state" role="status">
+                        <lightning-spinner alternative-text="Loading events" size="medium"></lightning-spinner>
+                    </div>
+                </template>
+                <template if:true={errorMessage}>
+                    <div class="slds-notify slds-notify_alert slds-alert_error" role="alert">{errorMessage}</div>
+                </template>
+                <template if:true={showEmptyState}>
+                    <div class="empty-state" role="status">
+                        <h2>No events found</h2>
+                        <p>Try changing your search, category, or city.</p>
+                    </div>
+                </template>
+                <template if:true={hasEvents}>
+                    <div class="event-grid">
+                        <template for:each={events} for:item="event">
+                            <article class="event-card" key={event.Id}>
+                                <div class="event-card__poster" style={event.posterStyle}>
+                                    <span>{event.Name}</span>
+                                </div>
+                                <div class="slds-p-around_medium">
+                                    <h2>{event.Name}</h2>
+                                    <p>{event.displayCategory} · {event.displayEventType}</p>
+                                    <p>{event.displayDate} · {event.displayPrice}</p>
+                                    <lightning-button variant="brand" label="View event" data-event-id={event.Id} onclick={handleEventClick}></lightning-button>
+                                </div>
+                            </article>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </section>
+</template>

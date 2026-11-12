@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>68.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Event Dashboard</masterLabel>
+    <description>Modern summary dashboard for event activity and upcoming events.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+        <target>lightning__RecordPage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__AppPage,lightning__HomePage,lightning__RecordPage">
+            <property name="title" type="String" label="Dashboard title" default="Event dashboard" />
+            <property name="subtitle" type="String" label="Dashboard subtitle" default="A clear view of your event program and its momentum." />
+            <property name="periodLabel" type="String" label="Reporting period" default="This month" />
+            <property name="totalEvents" type="String" label="Total events" default="48" />
+            <property name="upcomingEvents" type="String" label="Upcoming events" default="12" />
+            <property name="activeAttendees" type="String" label="Active attendees" default="2,846" />
+            <property name="revenue" type="String" label="Event revenue" default="$128k" />
+            <property name="accentColor" type="String" label="Accent color" default="#635bff" />
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

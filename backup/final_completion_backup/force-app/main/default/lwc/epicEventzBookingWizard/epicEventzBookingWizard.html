@@ -1,0 +1,37 @@
+<template>
+    <lightning-card title="Book your EpicEventz experience" icon-name="standard:event">
+        <div class="wizard slds-p-around_medium">
+            <div class="steps slds-grid slds-m-bottom_large">
+                <span class={stepOneClass}>1 Selection</span>
+                <span class={stepTwoClass}>2 Information</span>
+                <span class={stepThreeClass}>3 Confirmation</span>
+            </div>
+            <template if:true={isSelectionStep}>
+                <lightning-input label="Event record Id" value={eventId} onchange={handleEventIdChange} required></lightning-input>
+                <lightning-input type="number" label="Tickets" min="1" value={ticketCount} onchange={handleTicketCountChange} required></lightning-input>
+                <lightning-button class="slds-m-top_medium" variant="brand" label="Continue" onclick={goToInformation}></lightning-button>
+            </template>
+            <template if:true={isInformationStep}>
+                <lightning-input label="Attendee record Id" value={attendeeId} onchange={handleAttendeeIdChange} required></lightning-input>
+                <div class="slds-m-top_medium">
+                    <lightning-button label="Back" onclick={goToSelection}></lightning-button>
+                    <lightning-button class="slds-m-left_small" variant="brand" label="Review booking" onclick={goToConfirmation}></lightning-button>
+                </div>
+            </template>
+            <template if:true={isConfirmationStep}>
+                <div class="summary slds-box">
+                    <p><strong>Event:</strong> {eventId}</p>
+                    <p><strong>Attendee:</strong> {attendeeId}</p>
+                    <p><strong>Tickets:</strong> {ticketCount}</p>
+                </div>
+                <div class="slds-m-top_medium">
+                    <lightning-button label="Back" onclick={goToInformation}></lightning-button>
+                    <lightning-button class="slds-m-left_small" variant="brand" label="Submit booking" onclick={submitBooking} disabled={isSubmitting}></lightning-button>
+                </div>
+            </template>
+            <template if:true={message}>
+                <div class="slds-notify slds-notify_alert slds-alert_info slds-m-top_medium">{message}</div>
+            </template>
+        </div>
+    </lightning-card>
+</template>

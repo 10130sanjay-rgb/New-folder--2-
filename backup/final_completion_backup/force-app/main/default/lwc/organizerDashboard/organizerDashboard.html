@@ -1,0 +1,234 @@
+<template>
+    <div class="dashboard">
+
+        <!-- Dashboard Header -->
+        <div class="welcome">
+            <div>
+                <p class="eyebrow">EPICEVENTZ ORGANIZER PORTAL</p>
+                <h1>Organizer Dashboard</h1>
+                <p class="subtitle">
+                    Manage your events and monitor ticket bookings.
+                </p>
+            </div>
+
+            <lightning-button label="Refresh" icon-name="utility:refresh" onclick={handleRefresh}>
+            </lightning-button>
+        </div>
+
+        <!-- Loading Spinner -->
+        <template lwc:if={isLoading}>
+            <lightning-spinner alternative-text="Loading dashboard" size="medium">
+            </lightning-spinner>
+        </template>
+
+        <!-- Error Message -->
+        <template lwc:if={errorMessage}>
+            <div class="error-message">
+                {errorMessage}
+            </div>
+        </template>
+
+        <!-- Dashboard Content -->
+        <template lwc:if={hasData}>
+
+            <!-- Summary Cards -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-icon events-icon">
+                        <lightning-icon icon-name="standard:event" size="medium">
+                        </lightning-icon>
+                    </div>
+                    <p class="stat-label">Total Events</p>
+                    <h2>{totalEvents}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon upcoming-icon">
+                        <lightning-icon icon-name="utility:date_input" size="medium">
+                        </lightning-icon>
+                    </div>
+                    <p class="stat-label">Upcoming Events</p>
+                    <h2>{upcomingEvents}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon bookings-icon">
+                        <lightning-icon icon-name="standard:orders" size="medium">
+                        </lightning-icon>
+                    </div>
+                    <p class="stat-label">Total Bookings</p>
+                    <h2>{totalBookings}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon confirmed-icon">
+                        <lightning-icon icon-name="utility:check" size="medium">
+                        </lightning-icon>
+                    </div>
+                    <p class="stat-label">Confirmed Bookings</p>
+                    <h2>{confirmedBookings}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon tickets-icon">
+                        <lightning-icon icon-name="standard:product" size="medium">
+                        </lightning-icon>
+                    </div>
+                    <p class="stat-label">Tickets Sold</p>
+                    <h2>{ticketsSold}</h2>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon revenue-icon">
+                        <lightning-icon icon-name="utility:money" size="medium">
+                        </lightning-icon>
+                    </div>
+                    <p class="stat-label">Successful Payments</p>
+                    <h2>{formattedRevenue}</h2>
+                </div>
+
+            </div>
+
+            <!-- Event-wise Capacity and Booking Details -->
+            <section class="events-section">
+
+                <div class="section-header">
+                    <div>
+                        <p class="eyebrow">EVENT MANAGEMENT</p>
+                        <h2>Event Capacity &amp; Ticket Bookings</h2>
+                        <p class="section-description">
+                            Track ticket sales and remaining capacity for
+                            each event.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Event List -->
+                <template lwc:if={hasEvents}>
+                    <div class="event-list">
+
+                        <template for:each={recentEvents} for:item="event">
+
+                            <article key={event.eventId} class="event-card">
+
+                                <!-- Event Information -->
+                                <div class="event-top">
+
+                                    <div class="event-info">
+                                        <h3>{event.eventName}</h3>
+
+                                        <p class="event-venue">
+                                            <lightning-icon icon-name="utility:location" size="x-small">
+                                            </lightning-icon>
+                                            {event.venueName}
+                                        </p>
+
+                                        <p class="event-date">
+                                            <lightning-icon icon-name="utility:event" size="x-small">
+                                            </lightning-icon>
+                                            {event.formattedDate}
+                                        </p>
+                                    </div>
+
+                                    <span class={event.statusClass}>
+                                        {event.displayStatus}
+                                    </span>
+
+                                </div>
+
+                                <!-- Capacity Statistics -->
+                                <div class="capacity-grid">
+
+                                    <div class="capacity-item">
+                                        <span class="capacity-label">
+                                            Total Capacity
+                                        </span>
+                                        <strong>
+                                            {event.formattedCapacity}
+                                        </strong>
+                                    </div>
+
+                                    <div class="capacity-item booked-item">
+                                        <span class="capacity-label">
+                                            Tickets Booked
+                                        </span>
+                                        <strong>
+                                            {event.ticketsBooked}
+                                        </strong>
+                                    </div>
+
+                                    <div class="capacity-item available-item">
+                                        <span class="capacity-label">
+                                            Tickets Available
+                                        </span>
+                                        <strong>
+                                            {event.ticketsAvailable}
+                                        </strong>
+                                    </div>
+
+                                    <div class="capacity-item progress-item">
+                                        <span class="capacity-label">
+                                            Capacity Filled
+                                        </span>
+                                        <strong>
+                                            {event.bookingPercentage}%
+                                        </strong>
+                                    </div>
+
+                                </div>
+
+                                <!-- Booking Progress -->
+                                <div class="progress-container">
+
+                                    <div class="progress-heading">
+                                        <span>Booking Progress</span>
+
+                                        <span>
+                                            {event.ticketsBooked}
+                                            /
+                                            {event.formattedCapacity}
+                                            tickets
+                                        </span>
+                                    </div>
+
+                                    <div class="progress-track" role="progressbar" aria-label="Event booking progress"
+                                        aria-valuemin="0" aria-valuemax="100" aria-valuenow={event.bookingPercentage}>
+
+                                        <div class={event.progressClass} data-progress={event.bookingPercentage}>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                            </article>
+
+                        </template>
+
+                    </div>
+                </template>
+
+                <!-- Empty State -->
+                <template lwc:else>
+                    <div class="empty-state">
+
+                        <lightning-icon icon-name="utility:event" size="large">
+                        </lightning-icon>
+
+                        <h3>No events found</h3>
+
+                        <p>
+                            Your events will appear here once they are
+                            available in Salesforce.
+                        </p>
+
+                    </div>
+                </template>
+
+            </section>
+
+        </template>
+
+    </div>
+</template>

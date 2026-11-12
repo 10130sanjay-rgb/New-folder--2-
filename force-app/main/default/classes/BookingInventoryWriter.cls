@@ -17,6 +17,7 @@ public with sharing class BookingInventoryWriter {
         }
 
         ticket.Available_Quantity__c -= quantity;
-        Database.update(ticket, AccessLevel.SYSTEM_MODE);
+        // CRUD & FLS already verified above
+        Database.update(ticket);
     }
 }

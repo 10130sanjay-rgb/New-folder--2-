@@ -1,0 +1,71 @@
+<template>
+    <section class="bookings-section" aria-labelledby="bookings-heading">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">YOUR EPIC EVENTZ</p>
+                <h2 id="bookings-heading">My bookings</h2>
+            </div>
+        </div>
+
+        <template lwc:if={isLoading}>
+            <div class="loading-state" role="status">
+                <lightning-spinner
+                    alternative-text="Loading your bookings"
+                    size="medium">
+                </lightning-spinner>
+            </div>
+        </template>
+
+        <template lwc:if={errorMessage}>
+            <div class="error-state" role="alert">{errorMessage}</div>
+        </template>
+
+        <template lwc:if={showEmptyState}>
+            <div class="empty-state" role="status">
+                <h3>No bookings yet</h3>
+                <p>Your event bookings will appear here after you reserve tickets.</p>
+            </div>
+        </template>
+
+        <template lwc:if={hasBookings}>
+            <div class="booking-list">
+                <template for:each={bookings} for:item="booking">
+                    <article class="booking-card" key={booking.Id}>
+                        <div class="booking-card__heading">
+                            <div>
+                                <p class="booking-reference">Booking {booking.Name}</p>
+                                <h3>{booking.eventName}</h3>
+                                <p class="booking-date">{booking.eventDate}</p>
+                            </div>
+                            <div class="booking-status">
+                                <span>{booking.Booking_Status__c}</span>
+                                <span>{booking.Payment_Status__c}</span>
+                            </div>
+                        </div>
+
+                        <dl class="booking-facts">
+                            <div>
+                                <dt>Ticket type</dt>
+                                <dd>{booking.ticketName}</dd>
+                            </div>
+                            <div>
+                                <dt>Quantity</dt>
+                                <dd>{booking.Quantity__c}</dd>
+                            </div>
+                            <div>
+                                <dt>Total</dt>
+                                <dd>{booking.displayTotal}</dd>
+                            </div>
+                        </dl>
+
+                        <template lwc:if={booking.Ticket_Code__c}>
+                            <p class="ticket-code">
+                                Ticket reference <strong>{booking.Ticket_Code__c}</strong>
+                            </p>
+                        </template>
+                    </article>
+                </template>
+            </div>
+        </template>
+    </section>
+</template>

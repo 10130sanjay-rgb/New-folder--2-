@@ -1,0 +1,141 @@
+:host {
+    display: block;
+    color: #171b2e;
+}
+
+.bookings-section {
+    padding: clamp(2.5rem, 5vw, 4.5rem) clamp(1rem, 6vw, 5.5rem);
+    background: #fffdfa;
+}
+
+.section-heading {
+    margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+    margin-bottom: .35rem;
+    color: #8d1d2c;
+    font-size: .72rem;
+    font-weight: 800;
+    letter-spacing: .16em;
+}
+
+.section-heading h2 {
+    margin: 0;
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    font-weight: 800;
+}
+
+.booking-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+    gap: 1rem;
+}
+
+.booking-card {
+    padding: 1.25rem;
+    border: 1px solid #e6e3df;
+    border-radius: 1rem;
+    background: #fff;
+    box-shadow: 0 .6rem 1.7rem rgba(25, 28, 42, .06);
+}
+
+.booking-card__heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.booking-reference,
+.booking-date {
+    margin: .2rem 0;
+    color: #737b8f;
+    font-size: .8rem;
+}
+
+.booking-card h3 {
+    margin: .4rem 0;
+    color: #171b2e;
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.booking-status {
+    display: grid;
+    justify-items: end;
+    gap: .35rem;
+    color: #7d2633;
+    font-size: .75rem;
+    font-weight: 700;
+    text-align: right;
+}
+
+.booking-facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr));
+    gap: .8rem;
+    margin: 1rem 0 0;
+    padding: 1rem 0;
+    border-top: 1px solid #e6e3df;
+    border-bottom: 1px solid #e6e3df;
+}
+
+.booking-facts dt {
+    color: #737b8f;
+    font-size: .72rem;
+}
+
+.booking-facts dd {
+    margin: .25rem 0 0;
+    font-weight: 700;
+}
+
+.ticket-code {
+    margin: .9rem 0 0;
+    color: #737b8f;
+    font-size: .8rem;
+    overflow-wrap: anywhere;
+}
+
+.ticket-code strong {
+    color: #171b2e;
+}
+
+.loading-state {
+    position: relative;
+    min-height: 5rem;
+}
+
+.error-state,
+.empty-state {
+    padding: 1.25rem;
+    border-radius: .75rem;
+    background: #f7f5f2;
+}
+
+.error-state {
+    color: #991b1b;
+}
+
+.empty-state {
+    color: #737b8f;
+    text-align: center;
+}
+
+.empty-state h3 {
+    margin: 0 0 .4rem;
+    color: #171b2e;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 32rem) {
+    .booking-card__heading {
+        flex-direction: column;
+    }
+
+    .booking-status {
+        justify-items: start;
+        text-align: left;
+    }
+}

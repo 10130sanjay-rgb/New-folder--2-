@@ -1,0 +1,85 @@
+<template>
+    <lightning-card title="EpicEventz Strategic Command & Booking Desk" icon-name="custom:custom63">
+        <div class="slds-p-around_medium bg-dashboard">
+            <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_large">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                    <div class="metric-card">
+                        <p class="metric-label">Registration Velocity</p>
+                        <h2 class="metric-value">Active Engine</h2>
+                        <span class="metric-status">ONLINE</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                    <div class="metric-card">
+                        <p class="metric-label">Capacity Guard</p>
+                        <h2 class="metric-value">ENABLED</h2>
+                        <span class="metric-status">LOCKED</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                    <div class="metric-card">
+                        <p class="metric-label">Duplicate Shield</p>
+                        <h2 class="metric-value">ACTIVE</h2>
+                        <span class="metric-status">MONITORING</span>
+                    </div>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-4">
+                    <div class="metric-card">
+                        <p class="metric-label">Waitlist Routing</p>
+                        <h2 class="metric-value">READY</h2>
+                        <span class="metric-status">AUTOMATED</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="booking-desk slds-box slds-theme_default slds-m-top_medium">
+                <div class="desk-heading">
+                    <div>
+                        <p class="eyebrow">LIVE AUTOMATION CONSOLE</p>
+                        <h2 class="slds-text-heading_medium font-bold">Live AI Booking Verification Desk</h2>
+                        <p class="desk-subtitle">Run a production-path registration check against the EpicEventz engine.</p>
+                    </div>
+                    <span class="engine-badge">ENGINE v1.0</span>
+                </div>
+
+                <div class="slds-grid slds-wrap slds-gutters">
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            label="Target Event ID"
+                            data-id="evtId"
+                            required
+                            message-when-value-missing="Enter the Event record Id.">
+                        </lightning-input>
+                    </div>
+                    <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+                        <lightning-input
+                            label="Attendee Record ID"
+                            data-id="attId"
+                            required
+                            message-when-value-missing="Enter the Attendee record Id.">
+                        </lightning-input>
+                    </div>
+                </div>
+
+                <div class="desk-actions slds-m-top_medium">
+                    <lightning-button
+                        label="Submit Instant Registration Check"
+                        variant="brand"
+                        onclick={handleTestBooking}
+                        disabled={isProcessing}>
+                    </lightning-button>
+                    <template if:true={isProcessing}>
+                        <lightning-spinner alternative-text="Processing registration" size="small"></lightning-spinner>
+                    </template>
+                </div>
+
+                <template if:true={operationMessage}>
+                    <div class={operationMessageClass} role="status">
+                        <lightning-icon icon-name={operationIcon} alternative-text="" size="x-small"></lightning-icon>
+                        <h2>{operationMessage}</h2>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

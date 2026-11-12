@@ -1,0 +1,154 @@
+:host {
+    display: block;
+    font-family: "Salesforce Sans", Arial, sans-serif;
+}
+
+.bg-dashboard {
+    min-height: 28rem;
+    color: #f5f7fb;
+    background:
+        radial-gradient(circle at 88% 0, rgba(214, 166, 77, 0.14), transparent 25rem),
+        linear-gradient(145deg, #0d111b 0%, #161b29 55%, #26191e 100%);
+}
+
+.metric-card {
+    min-height: 7rem;
+    padding: 1.1rem;
+    background: rgba(22, 29, 43, 0.88);
+    border: 1px solid #35425a;
+    border-radius: 0.7rem;
+    box-shadow: 0 0.6rem 1.5rem rgba(0, 0, 0, 0.2);
+}
+
+.metric-label,
+.eyebrow {
+    margin-bottom: 0.45rem;
+    color: #9daac0;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+}
+
+.metric-value {
+    margin-bottom: 0.7rem;
+    color: #fff;
+    font-size: 1.1rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+}
+
+.metric-status,
+.engine-badge {
+    display: inline-block;
+    padding: 0.25rem 0.45rem;
+    color: #70e0b3;
+    font-size: 0.57rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    background: rgba(38, 158, 116, 0.16);
+    border: 1px solid rgba(112, 224, 179, 0.35);
+    border-radius: 0.25rem;
+}
+
+.booking-desk {
+    position: relative;
+    overflow: hidden;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.97);
+    border: 0;
+    border-radius: 0.8rem;
+    box-shadow: 0 1.25rem 2rem rgba(0, 0, 0, 0.22);
+}
+
+.booking-desk::before {
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    height: 0.22rem;
+    background: linear-gradient(90deg, #e1262f, #d6a64d);
+    content: "";
+}
+
+.desk-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.4rem;
+}
+
+.desk-heading h2 {
+    color: #17233c;
+}
+
+.desk-subtitle {
+    margin-bottom: 0;
+    color: #69758c;
+    font-size: 0.8rem;
+}
+
+.engine-badge {
+    flex-shrink: 0;
+    color: #b2761d;
+    background: #fff5df;
+    border-color: #e8c77e;
+}
+
+.desk-actions {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.desk-actions lightning-spinner {
+    position: relative;
+    width: 2rem;
+    height: 2rem;
+}
+
+.operation-message {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-top: 1.25rem;
+    padding: 0.8rem 1rem;
+    border-left: 0.25rem solid;
+    border-radius: 0.25rem;
+}
+
+.operation-message h2 {
+    margin: 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.operation-message--success {
+    color: #176b4e;
+    background: #e8f7f0;
+    border-color: #21a574;
+}
+
+.operation-message--warning {
+    color: #805c16;
+    background: #fff7e2;
+    border-color: #d6a64d;
+}
+
+.operation-message--error {
+    color: #a51f2b;
+    background: #fcebed;
+    border-color: #e1262f;
+}
+
+@media (max-width: 600px) {
+    .desk-heading {
+        display: block;
+    }
+
+    .engine-badge {
+        margin-top: 1rem;
+    }
+}

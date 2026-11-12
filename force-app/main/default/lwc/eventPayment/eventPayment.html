@@ -2,8 +2,8 @@
     <div class="payment-container">
         <div class="payment-card">
             <div class="header">
-                <h1>Booking Payment Status</h1>
-                <p>Payment is not collected on this page.</p>
+                <h1>Complete Your Booking</h1>
+                <p>EpicEventz secure payment simulation</p>
             </div>
 
             <template lwc:if={isLoading}>
@@ -16,16 +16,6 @@
             <template lwc:if={errorMessage}>
                 <div class="error-message">
                     {errorMessage}
-                </div>
-            </template>
-
-            <template lwc:if={showSimulatorUnavailable}>
-                <div class="simulation-notice">
-                    <strong>Payment is not available yet.</strong>
-                    <p>
-                        Your booking remains pending. No payment has been
-                        collected or confirmed.
-                    </p>
                 </div>
             </template>
 
@@ -72,9 +62,8 @@
                     </lightning-radio-group>
 
                     <div class="simulation-notice">
-                        <strong>Authorized development/testing only:</strong>
-                        This simulator does not collect money, create a
-                        payment record, or confirm your booking.
+                        <strong>Demo mode:</strong>
+                        No real money will be collected.
                     </div>
 
                     <lightning-radio-group
@@ -107,16 +96,23 @@
                 <div class="success-panel">
                     <div class="status-icon">✓</div>
 
-                    <h2>Simulation succeeded</h2>
+                    <h2>Payment Successful!</h2>
+
+                    <p>Your booking is confirmed.</p>
+
                     <p>
-                        No funds were received. Your booking remains pending
-                        until a trusted payment confirmation process is
-                        available.
+                        <strong>Transaction ID:</strong>
+                        {paymentResult.transactionId}
                     </p>
 
                     <p>
-                        <strong>Simulation reference:</strong>
-                        {paymentResult.simulationReference}
+                        <strong>Ticket Code:</strong>
+                        {paymentDetails.ticketCode}
+                    </p>
+
+                    <p>
+                        <strong>Amount Paid:</strong>
+                        ₹{formattedAmount}
                     </p>
 
                     <lightning-button
@@ -132,12 +128,12 @@
                     <h2>Payment Failed</h2>
 
                     <p>
-                        No funds were received. Your booking remains pending.
+                        Your booking remains pending while it is valid.
                     </p>
 
                     <p>
-                        <strong>Simulation reference:</strong>
-                        {paymentResult.simulationReference}
+                        <strong>Transaction ID:</strong>
+                        {paymentResult.transactionId}
                     </p>
 
                     <lightning-button

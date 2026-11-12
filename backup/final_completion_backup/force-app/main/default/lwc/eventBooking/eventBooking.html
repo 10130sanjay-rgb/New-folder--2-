@@ -1,0 +1,144 @@
+<template>
+    <div class="booking-container">
+        <div class="booking-header">
+            <h1>Book Your Tickets</h1>
+            <p>Choose your event, select your tickets, and reserve your place.</p>
+        </div>
+
+        <template lwc:if={isLoading}>
+            <lightning-spinner
+                alternative-text="Loading booking details"
+                size="medium">
+            </lightning-spinner>
+        </template>
+
+        <template lwc:if={errorMessage}>
+            <div class="error-message">{errorMessage}</div>
+        </template>
+
+        <template lwc:if={successMessage}>
+            <div class="success-message">
+                <h2>Booking Created!</h2>
+                <p>{successMessage}</p>
+                <p><strong>Ticket Code:</strong> {ticketCode}</p>
+                <p><strong>Total Amount:</strong> ₹{totalAmount}</p>
+            </div>
+        </template>
+
+        <template lwc:if={showForm}>
+            <form onsubmit={handleSubmit}>
+                <section class="form-section">
+                    <h2>1. Select Your Ticket</h2>
+
+                    <lightning-combobox
+                        name="event"
+                        label="Event"
+                        value={selectedEventId}
+                        options={eventOptions}
+                        onchange={handleEventChange}
+                        placeholder="Choose an event"
+                        required>
+                    </lightning-combobox>
+
+                    <lightning-combobox
+                        name="ticket"
+                        label="Ticket Type"
+                        value={selectedTicketId}
+                        options={ticketOptions}
+                        onchange={handleTicketChange}
+                        placeholder="Choose a ticket type"
+                        disabled={ticketTypesDisabled}
+                        required>
+                    </lightning-combobox>
+
+                    <template lwc:if={selectedTicket}>
+                        <div class="ticket-details">
+                            <p>
+                                <strong>Category:</strong>
+                                {selectedTicket.category}
+                            </p>
+
+                            <p>
+                                <strong>Price per ticket:</strong>
+                                ₹{selectedTicket.price}
+                            </p>
+
+                            <p>
+                                <strong>Available:</strong>
+                                {selectedTicket.availableQuantity}
+                            </p>
+
+                            <template lwc:if={selectedTicket.description}>
+                                <p>{selectedTicket.description}</p>
+                            </template>
+                        </div>
+                    </template>
+
+                    <lightning-input
+                        type="number"
+                        name="quantity"
+                        label="Number of Tickets"
+                        value={quantity}
+                        min="1"
+                        max="10"
+                        step="1"
+                        onchange={handleQuantityChange}
+                        required>
+                    </lightning-input>
+
+                    <div class="total-box">
+                        <span>Estimated Total</span>
+                        <strong>₹{estimatedTotal}</strong>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <h2>2. Attendee Details</h2>
+
+                    <lightning-input
+                        name="firstName"
+                        label="First Name"
+                        value={firstName}
+                        onchange={handleInputChange}>
+                    </lightning-input>
+
+                    <lightning-input
+                        name="lastName"
+                        label="Last Name"
+                        value={lastName}
+                        onchange={handleInputChange}
+                        required>
+                    </lightning-input>
+
+                    <lightning-input
+                        type="email"
+                        name="email"
+                        label="Email Address"
+                        value={email}
+                        onchange={handleInputChange}
+                        required>
+                    </lightning-input>
+
+                    <lightning-input
+                        type="tel"
+                        name="phone"
+                        label="Phone Number"
+                        value={phone}
+                        onchange={handleInputChange}>
+                    </lightning-input>
+                </section>
+
+                <div class="form-footer">
+                    <p>Payment is not collected by this form.</p>
+
+                    <lightning-button
+                        type="submit"
+                        variant="brand"
+                        label="Create Booking"
+                        disabled={isSubmitting}>
+                    </lightning-button>
+                </div>
+            </form>
+        </template>
+    </div>
+</template>
